@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/NameTune/static/css/main.cbb8e93c.css",
-    "main.js": "/NameTune/static/js/main.d12e8774.js",
+    "main.css": "/NameTune/static/css/main.06484ba0.css",
+    "main.js": "/NameTune/static/js/main.0334c699.js",
     "index.html": "/NameTune/index.html",
-    "main.cbb8e93c.css.map": "/NameTune/static/css/main.cbb8e93c.css.map",
-    "main.d12e8774.js.map": "/NameTune/static/js/main.d12e8774.js.map"
+    "main.06484ba0.css.map": "/NameTune/static/css/main.06484ba0.css.map",
+    "main.0334c699.js.map": "/NameTune/static/js/main.0334c699.js.map"
   },
   "entrypoints": [
-    "static/css/main.cbb8e93c.css",
-    "static/js/main.d12e8774.js"
+    "static/css/main.06484ba0.css",
+    "static/js/main.0334c699.js"
   ]
 }
