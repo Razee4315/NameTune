@@ -1,0 +1,93 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Caveat:wght@400;500;600;700&display=swap');
+
+/* Base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    font-family: 'Kalam', cursive;
+    background: #f7f5f3;
+    background-image: 
+        radial-gradient(circle at 20px 80px, #e8e4e0 1px, transparent 1px),
+        radial-gradient(circle at 80px 20px, #e8e4e0 1px, transparent 1px),
+        radial-gradient(circle at 40px 40px, #ede9e5 0.5px, transparent 0.5px);
+    background-size: 100px 100px;
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(90deg, transparent 79px, #e8e4e0 79px, #e8e4e0 81px, transparent 81px),
+        linear-gradient(#f7f5f3 0%, #f7f5f3 100%);
+    background-size: 100px 100%, 100% 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+#root {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Floating doodles */
+.floating-doodle {
+    position: fixed;
+    pointer-events: none;
+    opacity: 0.1;
+    z-index: -1;
+}
+
+.floating-doodle:nth-child(1) {
+    top: 10%;
+    left: 5%;
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e74c3c;
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.floating-doodle:nth-child(2) {
+    top: 20%;
+    right: 10%;
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 30px solid #3498db;
+    animation: float 8s ease-in-out infinite reverse;
+}
+
+.floating-doodle:nth-child(3) {
+    bottom: 15%;
+    left: 8%;
+    width: 50px;
+    height: 30px;
+    border: 3px solid #f39c12;
+    border-radius: 25px;
+    animation: float 7s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(5deg); }
+}

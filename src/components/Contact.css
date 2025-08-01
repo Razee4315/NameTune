@@ -1,0 +1,230 @@
+/* Contact Page Styles */
+.contact-container {
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header styles */
+.contact-header {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.contact-header h1 {
+    font-family: 'Caveat', cursive;
+    color: #2c3e50;
+    font-size: 2.5em;
+    margin-bottom: 15px;
+    transform: rotate(-1deg);
+    text-shadow: 2px 2px 0px #ecf0f1;
+}
+
+.contact-header p {
+    font-family: 'Kalam', cursive;
+    color: #34495e;
+    font-size: 1.2em;
+    transform: rotate(0.5deg);
+    margin-top: 10px;
+}
+
+.contact-doodle {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border: 3px solid #e74c3c;
+    border-radius: 50%;
+    top: -20px;
+    left: -30px;
+    transform: rotate(-15deg);
+    opacity: 0.7;
+}
+
+.contact-doodle::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #3498db;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Content layout */
+.contact-content {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+/* Developer info section */
+.developer-info {
+    padding: 30px;
+    background: #ebf5fb;
+    border: 2px dashed #3498db;
+    border-radius: 15px;
+    transform: rotate(-0.5deg);
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+}
+
+.developer-info::before {
+    content: '👨‍💻';
+    position: absolute;
+    top: -15px;
+    left: 20px;
+    background: #3498db;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 50%;
+    font-size: 1.2em;
+}
+
+.developer-info h3 {
+    font-family: 'Caveat', cursive;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+    transform: rotate(0.5deg);
+    text-align: center;
+}
+
+.contact-details {
+    margin-top: 25px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 20px;
+    background: #fefefe;
+    border: 3px solid #ecf0f1;
+    border-radius: 15px;
+    transform: rotate(0.3deg);
+    box-shadow: 3px 3px 0 #bdc3c7;
+    transition: all 0.3s ease;
+}
+
+.contact-item:hover {
+    transform: rotate(0deg) translateY(-2px);
+    box-shadow: 5px 5px 0 #bdc3c7;
+}
+
+.contact-item:nth-child(even) {
+    transform: rotate(-0.3deg);
+}
+
+.contact-item:nth-child(even):hover {
+    transform: rotate(0deg) translateY(-2px);
+}
+
+.contact-icon {
+    font-size: 2em;
+    margin-right: 20px;
+    min-width: 50px;
+    text-align: center;
+}
+
+.contact-item strong {
+    font-family: 'Caveat', cursive;
+    font-size: 1.4em;
+    color: #2c3e50;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.contact-item p {
+    margin: 0;
+    color: #34495e;
+    font-family: 'Kalam', cursive;
+    font-size: 1.1em;
+}
+
+.contact-item a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.contact-item a:hover {
+    color: #2980b9;
+    transform: scale(1.05);
+}
+
+.contact-item a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: #3498db;
+    transition: width 0.3s ease;
+}
+
+.contact-item a:hover::after {
+    width: 100%;
+}
+
+
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .contact-header h1 {
+        font-size: 2.2em;
+    }
+
+    .contact-container {
+        padding: 15px;
+    }
+
+    .developer-info {
+        padding: 25px;
+    }
+
+    .contact-item {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .contact-icon {
+        font-size: 1.8em;
+        margin-right: 15px;
+        min-width: 45px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contact-container {
+        padding: 10px;
+        max-width: 100%;
+    }
+
+    .developer-info {
+        padding: 20px;
+    }
+
+    .contact-header h1 {
+        font-size: 2em;
+    }
+
+    .contact-item {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .contact-icon {
+        margin-right: 0;
+        margin-bottom: 10px;
+        font-size: 2.5em;
+    }
+}
