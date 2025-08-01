@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/NameTune/static/css/main.cbb8e93c.css",
+    "main.js": "/NameTune/static/js/main.d12e8774.js",
+    "index.html": "/NameTune/index.html",
+    "main.cbb8e93c.css.map": "/NameTune/static/css/main.cbb8e93c.css.map",
+    "main.d12e8774.js.map": "/NameTune/static/js/main.d12e8774.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.cbb8e93c.css",
+    "static/js/main.d12e8774.js"
+  ]
+}
