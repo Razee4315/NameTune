@@ -111,4 +111,4 @@ MIT License - feel free to use and modify.
 
 ## 🎵 Start Creating Music!
 
-Transform your name into a beautiful melody and discover the music hidden in your identity!
+Transform your name into a beautiful melody and discover the music hidden in your identity
