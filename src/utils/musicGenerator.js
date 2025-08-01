@@ -15,7 +15,7 @@ const noteFrequencies = {
 export function textToNotes(text) {
     const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
     const result = [];
-    
+
     for (let i = 0; i < text.length; i++) {
         const char = text[i].toLowerCase();
         if (char.match(/[a-z]/)) {
@@ -25,17 +25,27 @@ export function textToNotes(text) {
             result.push({
                 note: note,
                 octave: octave,
-                character: text[i]
+                character: text[i],
+                isRest: false
             });
         } else if (char.match(/[0-9]/)) {
             // Numbers affect octave
             const lastNote = result[result.length - 1];
-            if (lastNote) {
+            if (lastNote && !lastNote.isRest) {
                 lastNote.octave = parseInt(char) + 3;
             }
+        } else if (char === ' ') {
+            // Spaces become rests
+            result.push({
+                note: null,
+                octave: null,
+                character: ' ',
+                isRest: true
+            });
         }
+        // Other characters are ignored (like punctuation)
     }
-    
+
     return result;
 }
 
@@ -72,22 +82,27 @@ export function createWAVFile(notes) {
     notes.forEach((noteInfo, index) => {
         const startSample = Math.floor(index * duration * sampleRate);
         const endSample = Math.floor((index + 1) * duration * sampleRate);
-        const octaveIndex = Math.min(Math.max(noteInfo.octave - 4, 0), 3); // Clamp to available octaves
-        const frequency = noteFrequencies[noteInfo.note][octaveIndex];
-        
-        // Generate piano-like waveform
-        for (let i = startSample; i < endSample && i < numSamples; i++) {
-            const time = i / sampleRate;
-            const noteTime = time - index * duration;
-            let amplitude = 0.3 * Math.exp(-8 * noteTime); // Piano-like decay
-            
-            // Piano harmonics
-            const sample = Math.sin(2 * Math.PI * frequency * time) * 0.8 +
-                          Math.sin(2 * Math.PI * frequency * 2 * time) * 0.3 +
-                          Math.sin(2 * Math.PI * frequency * 3 * time) * 0.1;
-            
-            audioBuffer[i] += amplitude * sample;
+
+        if (!noteInfo.isRest) {
+            // Only generate sound for actual notes, not rests
+            const octaveIndex = Math.min(Math.max(noteInfo.octave - 4, 0), 3); // Clamp to available octaves
+            const frequency = noteFrequencies[noteInfo.note][octaveIndex];
+
+            // Generate piano-like waveform
+            for (let i = startSample; i < endSample && i < numSamples; i++) {
+                const time = i / sampleRate;
+                const noteTime = time - index * duration;
+                let amplitude = 0.3 * Math.exp(-8 * noteTime); // Piano-like decay
+
+                // Piano harmonics
+                const sample = Math.sin(2 * Math.PI * frequency * time) * 0.8 +
+                              Math.sin(2 * Math.PI * frequency * 2 * time) * 0.3 +
+                              Math.sin(2 * Math.PI * frequency * 3 * time) * 0.1;
+
+                audioBuffer[i] += amplitude * sample;
+            }
         }
+        // For rests (isRest = true), we simply leave the audio buffer silent for that duration
     });
     
     // Convert Float32Array to Int16Array for WAV
@@ -157,15 +172,24 @@ export function createMIDIFile(notes) {
     // Create track data
     const trackData = [];
     
-    // Add notes
+    // Add notes and rests
+    let accumulatedDeltaTime = 0;
+
     notes.forEach((noteInfo, index) => {
-        const noteNumber = (noteInfo.octave * 12) + noteMap[noteInfo.note];
-        const deltaTime = index === 0 ? 0 : 96; // 96 ticks between notes
-        
-        // Note on
-        trackData.push(deltaTime, 0x90, noteNumber, 80); // Note on, velocity 80
-        // Note off
-        trackData.push(96, 0x80, noteNumber, 0); // Note off after 96 ticks
+        if (noteInfo.isRest) {
+            // For rests (spaces), accumulate delta time for the next note
+            accumulatedDeltaTime += 96; // Add rest duration
+        } else {
+            // Regular note
+            const noteNumber = (noteInfo.octave * 12) + noteMap[noteInfo.note];
+            const deltaTime = index === 0 ? 0 : 96 + accumulatedDeltaTime;
+            accumulatedDeltaTime = 0; // Reset accumulated time
+
+            // Note on
+            trackData.push(deltaTime, 0x90, noteNumber, 80); // Note on, velocity 80
+            // Note off
+            trackData.push(96, 0x80, noteNumber, 0); // Note off after 96 ticks
+        }
     });
     
     // End of track
@@ -183,6 +207,181 @@ export function createMIDIFile(notes) {
     midiFile.set(track, header.length);
     
     return midiFile.buffer;
+}
+
+// MIDI Decryption Functions
+
+// Parse MIDI file and extract notes
+export function parseMIDIFile(arrayBuffer) {
+    const data = new Uint8Array(arrayBuffer);
+    let offset = 0;
+
+    // Check MIDI header
+    const headerChunk = data.slice(0, 4);
+    const headerString = String.fromCharCode(...headerChunk);
+    if (headerString !== 'MThd') {
+        throw new Error('Invalid MIDI file: Missing MThd header');
+    }
+
+    // Skip header (14 bytes total)
+    offset = 14;
+
+    // Find track chunk
+    while (offset < data.length) {
+        const chunkType = String.fromCharCode(...data.slice(offset, offset + 4));
+        const chunkLength = (data[offset + 4] << 24) | (data[offset + 5] << 16) |
+                           (data[offset + 6] << 8) | data[offset + 7];
+
+        if (chunkType === 'MTrk') {
+            // Parse track data
+            const trackData = data.slice(offset + 8, offset + 8 + chunkLength);
+            return parseTrackData(trackData);
+        }
+
+        offset += 8 + chunkLength;
+    }
+
+    throw new Error('No track data found in MIDI file');
+}
+
+// Parse track data to extract note information
+function parseTrackData(trackData) {
+    const notes = [];
+    let offset = 0;
+
+    while (offset < trackData.length) {
+        // Read delta time (simplified - assuming single byte)
+        const deltaTime = trackData[offset];
+        offset++;
+
+        if (offset >= trackData.length) break;
+
+        const status = trackData[offset];
+        offset++;
+
+        // Note on event (0x90)
+        if (status === 0x90) {
+            if (offset + 1 >= trackData.length) break;
+
+            const noteNumber = trackData[offset];
+            const velocity = trackData[offset + 1];
+            offset += 2;
+
+            if (velocity > 0) { // Only process note-on events with velocity > 0
+                // Check if there was a long delta time before this note (indicating a rest/space)
+                if (deltaTime > 96) {
+                    // Calculate how many spaces this represents
+                    const numSpaces = Math.floor((deltaTime - 96) / 96);
+                    for (let i = 0; i < numSpaces; i++) {
+                        notes.push({
+                            note: null,
+                            octave: null,
+                            isRest: true
+                        });
+                    }
+                }
+
+                const noteInfo = midiNoteToNoteInfo(noteNumber);
+                if (noteInfo) {
+                    notes.push(noteInfo);
+                }
+            }
+        }
+        // Note off event (0x80) or other events - skip
+        else if (status === 0x80) {
+            offset += 2; // Skip note and velocity
+        }
+        // Meta event (0xFF)
+        else if (status === 0xFF) {
+            if (offset >= trackData.length) break;
+            const metaType = trackData[offset];
+            offset++;
+            if (metaType === 0x2F) { // End of track
+                break;
+            }
+            // Skip other meta events (simplified)
+            offset++;
+        }
+        else {
+            // Skip unknown events
+            offset++;
+        }
+    }
+
+    return notes;
+}
+
+// Convert MIDI note number back to note info
+function midiNoteToNoteInfo(noteNumber) {
+    const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const validNotes = ['C', 'D', 'E', 'F', 'G', 'A', 'B']; // Only notes we use
+
+    const octave = Math.floor(noteNumber / 12);
+    const noteIndex = noteNumber % 12;
+    const noteName = noteNames[noteIndex];
+
+    // Only return valid notes (no sharps/flats)
+    if (validNotes.includes(noteName)) {
+        return {
+            note: noteName,
+            octave: octave,
+            noteNumber: noteNumber
+        };
+    }
+
+    return null;
+}
+
+// Convert notes back to text
+export function notesToText(notes) {
+    const noteToChar = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+
+    let result = '';
+
+    for (const noteInfo of notes) {
+        if (noteInfo.isRest) {
+            // Rest represents a space
+            result += ' ';
+        } else {
+            // Find the note index (0-6 for C,D,E,F,G,A,B)
+            const noteIndex = noteToChar.indexOf(noteInfo.note);
+            if (noteIndex === -1) continue;
+
+            // Reverse the original algorithm:
+            // Original: noteIndex = char.charCodeAt(0) - 97; note = notes[noteIndex % 7]; octave = Math.floor(noteIndex / 7) + 3;
+            // To reverse: charIndex = (octave - 3) * 7 + (noteIndex % 7)
+            // But since noteIndex is already 0-6, we don't need the modulo
+            const charIndex = (noteInfo.octave - 3) * 7 + noteIndex;
+
+            // Convert back to character
+            if (charIndex >= 0 && charIndex <= 25) { // Valid range for a-z
+                const charCode = 97 + charIndex; // 97 = 'a'
+                result += String.fromCharCode(charCode);
+            }
+        }
+    }
+
+    return result;
+}
+
+// Main decryption function
+export function decryptMIDIToText(arrayBuffer) {
+    try {
+        const notes = parseMIDIFile(arrayBuffer);
+        const originalText = notesToText(notes);
+
+        return {
+            success: true,
+            originalText: originalText,
+            notes: notes,
+            noteCount: notes.length
+        };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.message
+        };
+    }
 }
 
 // Download file helper

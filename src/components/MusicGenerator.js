@@ -237,6 +237,12 @@ const MusicGenerator = () => {
                     <li>Piano sound with rich harmonics</li>
                     <li>Length controls the tempo</li>
                 </ul>
+
+                <div className="encryption-info">
+                    <h4>🔐 New Feature: Encryption & Decryption!</h4>
+                    <p>Your MIDI files now work like encrypted messages! Use the <strong>🔓 Decrypt</strong> page to upload any MIDI file created here and reveal the original text that was used to generate it.</p>
+                    <p><strong>✨ Spaces are preserved</strong> as musical rests, so "Hello World" will decrypt back to "hello world"!</p>
+                </div>
             </div>
         </div>
     );

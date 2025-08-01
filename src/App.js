@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import MusicGenerator from './components/MusicGenerator';
+import MIDIDecryptor from './components/MIDIDecryptor';
 import Contact from './components/Contact';
 import Navigation from './components/Navigation';
 import './App.css';
+import './test-encryption'; // Import test for browser console access
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -15,6 +17,8 @@ function App() {
     switch (currentPage) {
       case 'contact':
         return <Contact />;
+      case 'decrypt':
+        return <MIDIDecryptor />;
       case 'home':
       default:
         return <MusicGenerator />;

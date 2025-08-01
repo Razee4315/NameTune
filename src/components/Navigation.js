@@ -39,6 +39,14 @@ const Navigation = ({ currentPage, onPageChange }) => {
                     </li>
                     <li>
                         <button
+                            className={`nav-link ${currentPage === 'decrypt' ? 'active' : ''}`}
+                            onClick={() => handleNavClick('decrypt')}
+                        >
+                            🔓 Decrypt
+                        </button>
+                    </li>
+                    <li>
+                        <button
                             className={`nav-link ${currentPage === 'contact' ? 'active' : ''}`}
                             onClick={() => handleNavClick('contact')}
                         >
